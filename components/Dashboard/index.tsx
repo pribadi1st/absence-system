@@ -176,7 +176,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">24</div>
-            <p className="text-xs text-muted-foreground">+2 dari bulan lalu</p>
+            {/* <p className="text-xs text-muted-foreground">+2 dari bulan lalu</p> */}
           </CardContent>
         </Card>
 
@@ -187,7 +187,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">18</div>
-            <p className="text-xs text-muted-foreground">+3 dari kemarin</p>
+            {/* <p className="text-xs text-muted-foreground">+3 dari kemarin</p> */}
           </CardContent>
         </Card>
 
@@ -198,7 +198,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">3</div>
-            <p className="text-xs text-muted-foreground">-1 dari kemarin</p>
+            {/* <p className="text-xs text-muted-foreground">-1 dari kemarin</p> */}
           </CardContent>
         </Card>
 
@@ -209,7 +209,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">3</div>
-            <p className="text-xs text-muted-foreground">+1 dari kemarin</p>
+            {/* <p className="text-xs text-muted-foreground">+1 dari kemarin</p> */}
           </CardContent>
         </Card>
       </div>
@@ -225,7 +225,7 @@ export default function AdminDashboard() {
             </Button>
             <Button size="sm">
               <Plus className="mr-2 h-4 w-4" />
-              Tambah Data
+              Tambah Karyawan
             </Button>
           </div>
         </CardHeader>
@@ -235,13 +235,10 @@ export default function AdminDashboard() {
               <TableRow>
                 <TableHead>ID Karyawan</TableHead>
                 <TableHead>Nama</TableHead>
-                <TableHead>Jabatan</TableHead>
-                <TableHead>Departemen</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Check In</TableHead>
                 <TableHead>Check Out</TableHead>
                 <TableHead>Total Jam</TableHead>
-                <TableHead className="text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -249,8 +246,6 @@ export default function AdminDashboard() {
                 <TableRow key={staff.id}>
                   <TableCell className="font-medium">{staff.id}</TableCell>
                   <TableCell>{staff.name}</TableCell>
-                  <TableCell>{staff.position}</TableCell>
-                  <TableCell>{staff.department}</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusBadgeClass(staff.status)}`}>
                       {staff.status === 'present' && 'Hadir'}
@@ -262,11 +257,6 @@ export default function AdminDashboard() {
                   <TableCell>{staff.checkIn}</TableCell>
                   <TableCell>{staff.checkOut}</TableCell>
                   <TableCell>{staff.totalHours}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="sm" className="h-8">
-                      Detail
-                    </Button>
-                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

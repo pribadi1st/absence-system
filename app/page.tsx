@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 
 // Dynamically import components with no SSR to avoid hydration issues
 const StaffClockInOut = dynamic(() => import('@/components/Staff'), { ssr: false });
-const AdminDashboard = dynamic(() => import('@/components/admin-dashboard'), { ssr: false });
+const AdminDashboard = dynamic(() => import('@/components/Dashboard'), { ssr: false });
 
 export default function App() {
   return (
