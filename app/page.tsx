@@ -1,4 +1,12 @@
-import Image from "next/image";
+'use client';
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Clock, ClipboardList } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+// Dynamically import components with no SSR to avoid hydration issues
+const StaffClockInOut = dynamic(() => import('@/components/Staff'), { ssr: false });
+const AdminDashboard = dynamic(() => import('@/components/admin-dashboard'), { ssr: false });
 
 export default function App() {
   return (
@@ -9,8 +17,7 @@ export default function App() {
           <p className="text-lg text-gray-600">Kelola kehadiran karyawan dengan mudah</p>
         </div>
 
-
-        {/* <Tabs defaultValue="staff" className="w-full">
+        <Tabs defaultValue="staff" className="w-full">
           <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
             <TabsTrigger value="staff" className="flex items-center gap-2">
               <Clock className="size-4" />
@@ -22,14 +29,14 @@ export default function App() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="staff">
+          <TabsContent value="staff" className="mt-6">
             <StaffClockInOut />
           </TabsContent>
 
-          <TabsContent value="admin">
+          <TabsContent value="admin" className="mt-6">
             <AdminDashboard />
           </TabsContent>
-        </Tabs> */}
+        </Tabs>
       </div>
     </div>
   );
