@@ -113,7 +113,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
           <Input
@@ -165,7 +165,7 @@ export default function AdminDashboard() {
             <SelectItem value="custom">Custom Range</SelectItem>
           </SelectContent>
         </Select>
-      </div>
+      </div> */}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
