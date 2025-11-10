@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, ChangeEvent } from 'react';
+import { useState, ChangeEvent, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,80 +20,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-interface StaffAttendance {
-  id: string;
-  name: string;
-  position: string;
-  department: string;
-  status: 'present' | 'absent' | 'late' | 'time-off';
-  checkIn?: string;
-  checkOut?: string;
-  totalHours?: string;
-}
+import { StaffAttendance } from '@/types/attendances';
 
 export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
-
-  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  };
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [dateRange, setDateRange] = useState('today');
 
-  // Sample data - in a real app, this would come from an API
-  const staffData: StaffAttendance[] = [
-    {
-      id: 'EMP001',
-      name: 'John Doe',
-      position: 'Frontend Developer',
-      department: 'IT',
-      status: 'present',
-      checkIn: '08:00',
-      checkOut: '17:00',
-      totalHours: '9h 0m',
-    },
-    {
-      id: 'EMP002',
-      name: 'Jane Smith',
-      position: 'HR Manager',
-      department: 'HR',
-      status: 'late',
-      checkIn: '09:15',
-      checkOut: '18:15',
-      totalHours: '9h 0m',
-    },
-    {
-      id: 'EMP003',
-      name: 'Bob Johnson',
-      position: 'Backend Developer',
-      department: 'IT',
-      status: 'present',
-      checkIn: '08:05',
-      checkOut: '17:30',
-      totalHours: '9h 25m',
-    },
-    {
-      id: 'EMP004',
-      name: 'Alice Brown',
-      position: 'Designer',
-      department: 'Creative',
-      status: 'time-off',
-      checkIn: '-',
-      checkOut: '-',
-      totalHours: '0h 0m',
-    },
-  ];
+  const [staffsData, setStaffsData] = useState<StaffAttendance[]>([]);
+  useEffect(() => {
+    const fetchStaffsData = async () => {
+      const response = await fetch('/api/attendances');
+      const data = await response.json();
+      setStaffsData(data.data);
+    };
+    fetchStaffsData();
+  }, [])
 
-  const filteredData = staffData.filter((staff) => {
-    const matchesSearch = staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      staff.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDepartment = departmentFilter === 'all' || staff.department === departmentFilter;
-    const matchesStatus = statusFilter === 'all' || staff.status === statusFilter;
-
-    return matchesSearch && matchesDepartment && matchesStatus;
-  });
+  const todayPresent = staffsData.filter((staff) => staff.status === 'present').length;
+  const todayAbsent = staffsData.filter((staff) => staff.status === 'absent').length;
+  const todayLate = staffsData.filter((staff) => staff.status === 'late').length;
+  const todayClockOut = staffsData.filter((staff) => staff.status === 'clock-out').length;
 
   const statusBadgeClass = (status: string) => {
     switch (status) {
@@ -175,7 +122,7 @@ export default function AdminDashboard() {
             <div className="h-4 w-4 text-muted-foreground">👥</div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">24</div>
+            <div className="text-2xl font-bold">{staffsData.length}</div>
             {/* <p className="text-xs text-muted-foreground">+2 dari bulan lalu</p> */}
           </CardContent>
         </Card>
@@ -186,7 +133,7 @@ export default function AdminDashboard() {
             <div className="h-4 w-4 text-muted-foreground">✓</div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">18</div>
+            <div className="text-2xl font-bold">{todayPresent}</div>
             {/* <p className="text-xs text-muted-foreground">+3 dari kemarin</p> */}
           </CardContent>
         </Card>
@@ -197,7 +144,7 @@ export default function AdminDashboard() {
             <div className="h-4 w-4 text-muted-foreground">⏰</div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold">{todayLate}</div>
             {/* <p className="text-xs text-muted-foreground">-1 dari kemarin</p> */}
           </CardContent>
         </Card>
@@ -208,7 +155,7 @@ export default function AdminDashboard() {
             <div className="h-4 w-4 text-muted-foreground">✗</div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold">{todayAbsent}</div>
             {/* <p className="text-xs text-muted-foreground">+1 dari kemarin</p> */}
           </CardContent>
         </Card>
@@ -233,7 +180,6 @@ export default function AdminDashboard() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>ID Karyawan</TableHead>
                 <TableHead>Nama</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Check In</TableHead>
@@ -242,21 +188,17 @@ export default function AdminDashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredData.map((staff) => (
+              {staffsData.map((staff) => (
                 <TableRow key={staff.id}>
-                  <TableCell className="font-medium">{staff.id}</TableCell>
                   <TableCell>{staff.name}</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusBadgeClass(staff.status)}`}>
-                      {staff.status === 'present' && 'Hadir'}
-                      {staff.status === 'absent' && 'Tidak Hadir'}
-                      {staff.status === 'late' && 'Terlambat'}
-                      {staff.status === 'time-off' && 'Cuti/Izin'}
+                      {staff.status}
                     </span>
                   </TableCell>
                   <TableCell>{staff.checkIn}</TableCell>
                   <TableCell>{staff.checkOut}</TableCell>
-                  <TableCell>{staff.totalHours}</TableCell>
+                  <TableCell>{staff.totalJam}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -12,16 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Employees } from '@/types/employee';
 
-// Sample employee data - replace with your actual employee data
-const employees = [
-  { id: '1', name: 'John Doe', position: 'Developer' },
-  { id: '2', name: 'Jane Smith', position: 'Designer' },
-  { id: '3', name: 'Bob Johnson', position: 'Manager' },
-  // Add more employees as needed
-];
-
-export default function StaffClockInOut() {
+export default function StaffClockInOut({ employees }: { employees: Employees }) {
   const [isClockedIn, setIsClockedIn] = useState(false);
   const [showQRCode, setShowQRCode] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState('');
@@ -49,20 +42,22 @@ export default function StaffClockInOut() {
 
         {/* Employee Selection */}
         <div className="mb-6">
-          <Select onValueChange={setSelectedEmployee} value={selectedEmployee}>
-            <SelectTrigger className="w-full h-12 bg-white">
-              <SelectValue placeholder="Pilih Karyawan" />
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              {employees.map((employee) => (
-                <SelectItem key={employee.id} value={employee.id} className="hover:bg-gray-100">
-                  <div className="flex flex-col">
-                    <span className="font-medium">{employee.name}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {employees.length > 0 &&
+            <Select onValueChange={setSelectedEmployee} value={selectedEmployee}>
+              <SelectTrigger className="w-full h-12 bg-white">
+                <SelectValue placeholder="Pilih Karyawan" />
+              </SelectTrigger>
+              <SelectContent className="bg-white">
+                {employees.map((employee) => (
+                  <SelectItem key={employee.id} value={employee.id.toString()} className="hover:bg-gray-100">
+                    <div className="flex flex-col">
+                      <span className="font-medium">{employee.first_name + ' ' + employee.last_name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          }
         </div>
 
         <div className="grid grid-cols-2 gap-4 mb-6">

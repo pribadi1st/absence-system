@@ -3,12 +3,27 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Clock, ClipboardList } from 'lucide-react';
 import dynamic from 'next/dynamic';
-
+import { useEffect, useState } from 'react';
+import { Employees } from '@/types/employee';
 // Dynamically import components with no SSR to avoid hydration issues
 const StaffClockInOut = dynamic(() => import('@/components/Staff'), { ssr: false });
 const AdminDashboard = dynamic(() => import('@/components/Dashboard'), { ssr: false });
 
 export default function App() {
+  const [employees, setEmployees] = useState<Employees>([])
+
+  useEffect(() => {
+    const fetchEmployee = async () => {
+      const response = await fetch('/api/employees')
+      const data = await response.json()
+      if (response.ok) {
+        setEmployees(data.employees)
+      } else {
+        console.error(data)
+      }
+    }
+    fetchEmployee()
+  }, [])
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="container mx-auto p-4 md:p-8">
@@ -30,7 +45,7 @@ export default function App() {
           </TabsList>
 
           <TabsContent value="staff" className="mt-6">
-            <StaffClockInOut />
+            <StaffClockInOut employees={employees} />
           </TabsContent>
 
           <TabsContent value="admin" className="mt-6">
