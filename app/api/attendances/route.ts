@@ -31,6 +31,7 @@ export async function GET(req: NextRequest) {
     // Kalau tidak ada satupun record hari ini → semua dianggap belum hadir
     if (!attendance || attendance.length === 0) {
         const allAbsent = employees.map((emp) => ({
+            id: emp.id,
             name: `${emp.first_name} ${emp.last_name}`,
             status: 'Belum Hadir',
             checkIn: null,

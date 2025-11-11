@@ -1,10 +1,28 @@
 'use client';
 
-import { useState, ChangeEvent, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Input } from '@/components/ui/input';
-import { Search, Filter, Download, Plus } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Download, Plus } from 'lucide-react';
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -13,34 +31,95 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { StaffAttendance } from '@/types/attendances';
 
 export default function AdminDashboard() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [departmentFilter, setDepartmentFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
+  // const [searchTerm, setSearchTerm] = useState('');
+  // const [departmentFilter, setDepartmentFilter] = useState('all');
+  // const [statusFilter, setStatusFilter] = useState('all');
 
-  const [staffsData, setStaffsData] = useState<StaffAttendance[]>([]);
-  useEffect(() => {
-    const fetchStaffsData = async () => {
-      const response = await fetch('/api/attendances');
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [newEmployee, setNewEmployee] = useState({
+    firstName: '',
+    lastName: '',
+  });
+
+  const getEmployee = async () => {
+    const response = await fetch('/api/attendances');
+    const data = await response.json();
+    return data.data;
+  };
+  const { data: employees, refetch } = useQuery({ queryKey: ['employee'], queryFn: getEmployee })
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewEmployee(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const { mutate: deleteEmployee } = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/employees/${id}`, {
+        method: 'DELETE',
+      });
       const data = await response.json();
-      setStaffsData(data.data);
-    };
-    fetchStaffsData();
+      return data;
+    },
+    onSuccess: () => {
+      refetch();
+    },
+  })
+
+  const deleteStaff = async (id: number) => {
+    console.log(id)
+    await deleteEmployee(id)
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newEmployee),
+      });
+      const data = await response.json();
+
+      // For now, just log and close the dialog
+
+      setIsAddDialogOpen(false);
+      refetch();
+      // Reset form
+      setNewEmployee({
+        firstName: '',
+        lastName: '',
+      });
+    } catch (error) {
+      console.error('Error adding employee:', error);
+    }
+  };
+
+
+  useEffect(() => {
+    // getEmpl
   }, [])
 
-  const todayPresent = staffsData.filter((staff) => staff.status === 'present').length;
-  const todayAbsent = staffsData.filter((staff) => staff.status === 'absent').length;
-  const todayLate = staffsData.filter((staff) => staff.status === 'late').length;
-  const todayClockOut = staffsData.filter((staff) => staff.status === 'clock-out').length;
+  const todayPresent = useMemo(() => {
+    return employees?.filter((staff: StaffAttendance) => staff.status === 'present').length;
+  }, [employees])
+  const todayAbsent = useMemo(() => {
+    return employees?.filter((staff: StaffAttendance) => staff.status === 'absent' || staff.status.toLowerCase() === 'belum hadir').length;
+  }, [employees])
+  const todayLate = useMemo(() => {
+    return employees?.filter((staff: StaffAttendance) => staff.status === 'late').length;
+  }, [employees])
+  const todayClockOut = useMemo(() => {
+    return employees?.filter((staff: StaffAttendance) => staff.status === 'clock-out').length;
+  }, [employees])
 
   const statusBadgeClass = (status: string) => {
     switch (status) {
@@ -122,7 +201,7 @@ export default function AdminDashboard() {
             <div className="h-4 w-4 text-muted-foreground">👥</div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{staffsData.length}</div>
+            <div className="text-2xl font-bold">{employees?.length}</div>
             {/* <p className="text-xs text-muted-foreground">+2 dari bulan lalu</p> */}
           </CardContent>
         </Card>
@@ -170,7 +249,7 @@ export default function AdminDashboard() {
               <Download className="mr-2 h-4 w-4" />
               Export
             </Button>
-            <Button size="sm">
+            <Button size="sm" type="button" onClick={() => setIsAddDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Tambah Karyawan
             </Button>
@@ -185,10 +264,11 @@ export default function AdminDashboard() {
                 <TableHead>Check In</TableHead>
                 <TableHead>Check Out</TableHead>
                 <TableHead>Total Jam</TableHead>
+                <TableHead>Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {staffsData.map((staff) => (
+              {!!employees && employees.map((staff: StaffAttendance) => (
                 <TableRow key={staff.id}>
                   <TableCell>{staff.name}</TableCell>
                   <TableCell>
@@ -199,12 +279,66 @@ export default function AdminDashboard() {
                   <TableCell>{staff.checkIn}</TableCell>
                   <TableCell>{staff.checkOut}</TableCell>
                   <TableCell>{staff.totalJam}</TableCell>
+                  <TableCell>
+                    <Button variant="destructive" onClick={() => deleteStaff(staff.id)}>
+                      Delete
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      {/* Add Employee Dialog */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Tambah Karyawan Baru</DialogTitle>
+            <DialogDescription>
+              Isi data karyawan baru di bawah ini.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="firstName" className="text-right">
+                  Nama Depan
+                </Label>
+                <Input
+                  id="firstName"
+                  name="firstName"
+                  value={newEmployee.firstName}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="lastName" className="text-right">
+                  Nama Belakang
+                </Label>
+                <Input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  value={newEmployee.lastName}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                Batal
+              </Button>
+              <Button type="submit">Simpan</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
