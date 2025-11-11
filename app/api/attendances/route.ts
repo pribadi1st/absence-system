@@ -51,9 +51,34 @@ export async function GET(req: NextRequest) {
         else if (record?.clock_in && record?.clock_out) status = 'clock-out';
         let totalHour = 0
         if (record?.clock_in && record?.clock_out) {
-            const diffTime = Math.abs(record.clock_out.getTime() - record.clock_in.getTime());
-            const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
-            totalHour = diffHours;
+            // Example values:
+            // clock_in: "23:03:00"
+            // clock_out: "23:13:42"
+
+            // Create Date objects for both times (using the same date since they're on the same day)
+            const dateStr = record.attendance_date; // "2025-11-11"
+            const start = new Date(`${dateStr}T${record.clock_in}`);
+            const end = new Date(`${dateStr}T${record.clock_out}`);
+
+            // Calculate difference in milliseconds
+            const diffTime = Math.abs(end.getTime() - start.getTime());
+
+            // Convert to hours, minutes, seconds
+            const hours = Math.floor(diffTime / (1000 * 60 * 60));
+            const minutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diffTime % (1000 * 60)) / 1000);
+
+            // For your example (23:03:00 to 23:13:42):
+            // hours = 0
+            // minutes = 10
+            // seconds = 42
+            // total minutes = 10.7 minutes (10 + 42/60)
+
+            // If you want total hours as a decimal (e.g., 0.1783 hours for 10.7 minutes)
+            const totalHours = diffTime / (1000 * 60 * 60); // ~0.1783 for 10:42
+
+            // Or if you want a formatted string
+            const formattedDuration = `${hours}h ${minutes}m ${seconds}s`; // "0h 10m 42s"
         }
 
         return {
