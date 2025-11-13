@@ -157,13 +157,13 @@ export default function StaffClockInOut({ employees }: { employees: Employees })
                           <div className="flex items-center">
                             <span className="w-20">Pulang:</span>
                             <span className="font-medium">
-                              {empAttendance.attendance[0].clock_out ? empAttendance.attendance[0].clock_out : '-'}
+                              {empAttendance.attendance.length > 0 && empAttendance.attendance[0].clock_out ? empAttendance.attendance[0].clock_out : '-'}
                             </span>
                           </div>
                         </div>
                       </div>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${empAttendance.attendance.length > 1 ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
-                        {empAttendance.attendance[0].clock_out ? 'Selesai' : 'Sedang Bekerja'}
+                        {empAttendance.attendance.length > 0 && empAttendance.attendance[0].clock_out ? 'Selesai' : 'Sedang Bekerja'}
                       </span>
                     </div>
                   </div>
