@@ -80,7 +80,7 @@ export default function StaffClockInOut({ employees }: { employees: Employees })
 
   const canClockOut = useMemo(() => {
     if (!empAttendance) return true;
-    if (!empAttendance.attendance[0].clock_out) return true;
+    if (empAttendance.attendance.length == 1 && !!empAttendance.attendance[0].clock_in && !empAttendance.attendance[0].clock_out) return true;
     return false
     // Clockedin
   }, [empAttendance]);
